@@ -7,13 +7,17 @@ public class PlayerController : MonoBehaviour
 {
     public float walkSpeed, runSpeed, jumpHeight, gravity, turnSpeed, smooth;
 
-    public Transform child;
+    public Transform character;
+
+    Camera playerCamera;
 
     CharacterController controller;
 
     Animator animator;
 
     Vector2 input;
+
+    SkinnedMeshRenderer skinnedMeshRenderer;
 
     float verticalVelo;
 
@@ -22,11 +26,14 @@ public class PlayerController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        playerCamera = GetComponentInChildren<Camera>();
+        skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
     }
 
     // Update is called once per frame
     void Update()
     {
+
         input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
         if (controller.isGrounded) 
@@ -62,7 +69,18 @@ public class PlayerController : MonoBehaviour
         //rotate child model
         if (move != Vector3.zero) {
             Quaternion targetRotation = Quaternion.LookRotation(move);
-            child.rotation = Quaternion.Slerp(child.rotation, targetRotation, smooth * Time.deltaTime);
+            character.rotation = Quaternion.Slerp(character.rotation, targetRotation, smooth * Time.deltaTime);
+        }
+
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0)
+        {
+            playerCamera.transform.localPosition = new Vector3(0f, 0.86f, -0.015f);
+            skinnedMeshRenderer.enabled = false;
+        } else if (scroll < 0)
+        {
+            playerCamera.transform.localPosition = new Vector3(0f, 1.37f, -3.98f);
+            skinnedMeshRenderer.enabled = true;
         }
 
         move *= Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
