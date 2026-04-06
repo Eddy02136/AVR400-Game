@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour
 {
     public float walkSpeed, runSpeed, jumpHeight, gravity, turnSpeed, smooth;
 
-    public Transform character;
+    public Transform character, cameraPivot;
 
     Camera playerCamera;
 
@@ -59,28 +59,21 @@ public class PlayerController : MonoBehaviour
             verticalVelo -= gravity * Time.deltaTime;
         }
 
-        float turn = Input.GetAxis("Mouse X");
+        Vector3 forward = cameraPivot.forward;
+        forward.y = 0;
+        forward.Normalize();
 
-        transform.Rotate(Vector3.up * turn * turnSpeed * Time.deltaTime);
+        Vector3 right = cameraPivot.right;
+        right.y = 0;
+        right.Normalize();
 
-        Vector3 move = transform.right * input.x + transform.forward * input.y;
+        Vector3 move = right * input.x + forward * input.y;
         move = move.normalized;
 
         //rotate child model
         if (move != Vector3.zero) {
             Quaternion targetRotation = Quaternion.LookRotation(move);
             character.rotation = Quaternion.Slerp(character.rotation, targetRotation, smooth * Time.deltaTime);
-        }
-
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0)
-        {
-            playerCamera.transform.localPosition = new Vector3(0f, 0.86f, -0.015f);
-            skinnedMeshRenderer.enabled = false;
-        } else if (scroll < 0)
-        {
-            playerCamera.transform.localPosition = new Vector3(0f, 1.37f, -3.98f);
-            skinnedMeshRenderer.enabled = true;
         }
 
         move *= Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
